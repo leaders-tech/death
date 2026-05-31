@@ -59,7 +59,8 @@ export async function postJson<T>(path: string, body: unknown = {}): Promise<T> 
   return payload.data;
 }
 
-export function getWsUrl(): string {
+export function getWsUrl(lobbyId: string, playerToken: string): string {
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  return `${protocol}//${window.location.host}/ws`;
+  const params = new URLSearchParams({ lobby_id: lobbyId, player_token: playerToken });
+  return `${protocol}//${window.location.host}/ws?${params.toString()}`;
 }

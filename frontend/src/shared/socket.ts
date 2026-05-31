@@ -1,6 +1,6 @@
 /*
 This file keeps the small frontend websocket client with reconnect logic.
-Edit this file when websocket connection flow or client-side message handling changes.
+Edit this file when websocket connection flow or client-side game messages change.
 Copy this file as a starting point when you add another small websocket client helper.
 */
 
@@ -10,11 +10,19 @@ import { getWsUrl } from "./api";
 export type SocketStatus = "idle" | "connecting" | "connected" | "disconnected";
 
 type CreateSocketOptions = {
+  lobbyId: string;
+  playerToken: string;
   onMessage: (message: WsMessage) => void;
   onStatus: (status: SocketStatus) => void;
 };
 
-export function createUserSocket(options: CreateSocketOptions) {
+export type PlayerInput = {
+  left: boolean;
+  right: boolean;
+  jump_pressed: boolean;
+};
+
+export function createGameSocket(options: CreateSocketOptions) {
   let ws: WebSocket | null = null;
   let stopped = false;
   let reconnectTimer: number | null = null;
@@ -22,7 +30,7 @@ export function createUserSocket(options: CreateSocketOptions) {
 
   const connect = () => {
     options.onStatus("connecting");
-    ws = new WebSocket(getWsUrl());
+    ws = new WebSocket(getWsUrl(options.lobbyId, options.playerToken));
     ws.onopen = () => {
       reconnectDelayMs = 1500;
       options.onStatus("connected");
@@ -43,6 +51,9 @@ export function createUserSocket(options: CreateSocketOptions) {
   return {
     sendPing() {
       ws?.send(JSON.stringify({ type: "ping" }));
+    },
+    sendInput(input: PlayerInput) {
+      ws?.send(JSON.stringify({ type: "player.input", ...input }));
     },
     stop() {
       stopped = true;

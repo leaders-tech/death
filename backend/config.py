@@ -26,10 +26,6 @@ class Settings:
     db_path: Path
     cookie_secret: str
     frontend_origin: str
-    access_cookie_name: str = "template_access"
-    refresh_cookie_name: str = "template_refresh"
-    access_ttl_seconds: int = 2 * 60 * 60
-    refresh_ttl_seconds: int = 60 * 24 * 60 * 60
 
     @property
     def secure_cookies(self) -> bool:

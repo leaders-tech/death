@@ -5,7 +5,7 @@ Copy a test pattern here when you add another small realtime helper.
 */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createUserSocket } from "./socket";
+import { createGameSocket } from "./socket";
 
 class FakeWebSocket {
   static instances: FakeWebSocket[] = [];
@@ -40,7 +40,7 @@ class FakeWebSocket {
   }
 }
 
-describe("createUserSocket", () => {
+describe("createGameSocket", () => {
   const originalWebSocket = globalThis.WebSocket;
 
   beforeEach(() => {
@@ -59,11 +59,11 @@ describe("createUserSocket", () => {
     const onMessage = vi.fn();
     const onStatus = vi.fn();
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    const socket = createUserSocket({ onMessage, onStatus });
+    const socket = createGameSocket({ lobbyId: "ABCDE", playerToken: "token", onMessage, onStatus });
     const first = FakeWebSocket.instances[0];
 
     first.emitOpen();
-    first.emitMessage(JSON.stringify({ type: "ws.ready", user_id: 1, connections: 1 }));
+    first.emitMessage(JSON.stringify({ type: "ws.ready", lobby_id: "ABCDE", connections: 1 }));
     first.emitError();
     expect(warn).toHaveBeenCalledWith("WebSocket error.");
     first.close();
@@ -87,8 +87,11 @@ describe("createUserSocket", () => {
     vi.advanceTimersByTime(1);
 
     expect(onStatus).toHaveBeenCalledWith("connected");
-    expect(onMessage).toHaveBeenCalledWith({ type: "ws.ready", user_id: 1, connections: 1 });
+    expect(onMessage).toHaveBeenCalledWith({ type: "ws.ready", lobby_id: "ABCDE", connections: 1 });
     expect(FakeWebSocket.instances).toHaveLength(4);
+
+    socket.sendInput({ left: true, right: false, jump_pressed: true });
+    expect(FakeWebSocket.instances[3].sent).toContain(JSON.stringify({ type: "player.input", left: true, right: false, jump_pressed: true }));
 
     socket.stop();
     warn.mockRestore();

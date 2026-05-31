@@ -1,23 +1,51 @@
 /*
-This file keeps the small shared TypeScript types for users, notes, API results, and websocket messages.
+This file keeps shared TypeScript types for lobbies, game snapshots, API results, and websocket messages.
 Edit this file when backend JSON shapes or websocket message shapes change.
 Copy a type pattern here when you add another shared API or websocket type.
 */
 
-export type User = {
-  id: number;
-  username: string;
-  is_admin: boolean;
-  created_at: string;
-  updated_at: string;
+export type LivesSetting = number | "infinite";
+
+export type Player = {
+  id: string;
+  nickname: string;
+  is_host: boolean;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  on_ground: boolean;
+  wall_dir: number;
 };
 
-export type Note = {
-  id: number;
-  user_id: number;
-  text: string;
-  created_at: string;
-  updated_at: string;
+export type Lobby = {
+  id: string;
+  name: string;
+  status: "waiting" | "playing";
+  daemon_id: string | null;
+  lives: LivesSetting;
+  players: Player[];
+};
+
+export type Platform = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+export type Arena = {
+  width: number;
+  height: number;
+  platforms: Platform[];
+  player_width: number;
+  player_height: number;
+};
+
+export type GameSnapshot = {
+  type: "game.snapshot";
+  lobby: Lobby;
+  arena: Arena;
 };
 
 export type ApiOk<T> = {
@@ -36,6 +64,7 @@ export type ApiFail = {
 export type ApiResponse<T> = ApiOk<T> | ApiFail;
 
 export type WsMessage =
-  | { type: "ws.ready"; user_id: number; connections: number }
+  | { type: "ws.ready"; lobby_id: string; connections: number }
   | { type: "pong" }
-  | { type: "notes.changed"; note?: Note; note_id?: number };
+  | { type: "lobby.changed"; lobby: Lobby }
+  | GameSnapshot;

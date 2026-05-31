@@ -29,8 +29,8 @@ const frontendPort = requireEnv("E2E_FRONTEND_PORT");
 const backendUrl = `http://${backendHost}:${backendPort}`;
 const frontendUrl = `http://${frontendHost}:${frontendPort}`;
 const dbDir = process.env.E2E_DB_DIR?.trim() || os.tmpdir();
-const dbPath = process.env.E2E_DB_PATH?.trim() || path.join(dbDir, `templatepwa-e2e-${Date.now()}-${process.pid}.sqlite3`);
-const uvCacheDir = path.join(os.tmpdir(), "templatepwa-uv-cache");
+const dbPath = process.env.E2E_DB_PATH?.trim() || path.join(dbDir, `daemon-arena-e2e-${Date.now()}-${process.pid}.sqlite3`);
+const uvCacheDir = path.join(os.tmpdir(), "daemon-arena-uv-cache");
 
 export default defineConfig({
   testDir: "./tests/e2e",
